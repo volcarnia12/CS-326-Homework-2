@@ -15,6 +15,23 @@ import { dictionary } from "./dictionary.js";
  */
 function canConstructWord(availableTiles, word) {
   // Use your solution from Homework 1 or wait for solutions to be released.
+    let wordBool = true;
+    const tileHolder = Object.assign({}, availableTiles);
+    for (let x = 0; x < word.length; ++x){
+      	let wordHolder = word[x];
+        if (tileHolder.hasOwnProperty(wordHolder) && tileHolder[wordHolder] != 0){
+            tileHolder[wordHolder] = tileHolder[wordHolder] - 1;
+            continue;
+        }
+        else if (tileHolder.hasOwnProperty('*') && tileHolder['*'] != 0){
+            tileHolder['*'] = tileHolder['*'] - 1;
+        }
+        else{
+            wordBool = false;
+            break;
+        }
+    }
+    return wordBool;
 }
 
 /**
@@ -26,7 +43,36 @@ function canConstructWord(availableTiles, word) {
  * @returns {number} The base score for the given word.
  */
 function baseScore(word) {
-  // Use your solution from Homework 1 or wait for solutions to be released.
+    // Use your solution from Homework 1 or wait for solutions to be released.
+    let count = 0;
+    for (let i = 0; i < word.length; ++i){
+        if (word[i] === 'e' || word[i] === 'a' || word[i] === 'i' || word[i] === 'o' || word[i] === 'n' || 
+            word[i] === 'r' || word[i] === 't' || word[i] === 'l' || word[i] === 's' || word[i] === 'u'){
+                count = count + 1;
+        } 
+        else if (word[i] === 'd' || word[i] === 'g'){
+            count = count + 2;
+        }
+        else if (word[i] === 'b' || word[i] === 'c' || word[i] === 'm' || word[i] === 'p'){
+            count = count + 3;
+        }
+        else if (word[i] === 'f' || word[i] === 'h' || word[i] === 'v' || word[i] === 'w' || word[i] === 'y'){
+            count = count + 4;
+        }
+        else if (word[i] === 'k'){
+            count = count + 5;
+        }
+        else if (word[i] === 'j' || word[i] === 'x'){
+            count = count + 8;
+        }
+        else if (word[i] === '*'){
+            continue;
+        }
+        else if (word[i] === 'q' || word[i] === 'z'){
+            count = count + 10;
+        }
+    }
+    return count;
 }
 
 /**
@@ -40,7 +86,18 @@ function baseScore(word) {
  */
 function possibleWords(availableTiles) {
   // TODO
+  const wordArray = [];
+  const tileHolder = Object.assign({}, availableTiles);
+  for (let y = 0; y < dictionary.length; ++y){
+    if (canConstructWord(tileHolder, dictionary[y])){
+      wordArray.push(dictionary[y]);
+    }
+  }
+  return wordArray;
 }
+
+//console.log(canConstructWord({c: 1, a: 1, '*': 1}, "cat"));
+//console.log(possibleWords({'c': 1, '*': 1, 't': 1}));
 
 /**
  * Finds and returns the word(s) with the highest base score from the
@@ -52,9 +109,56 @@ function possibleWords(availableTiles) {
  * highest base score that can be constructed with the given tiles. The array is
  * empty if there are no words available to construct.
  */
+
+function makeWord(availableTiles){
+  let tileHolder = Object.assign({}, availableTiles);
+  const words = possibleWords(tileHolder);
+  const wordArr = [];
+  for (let x = 0; x < words.length; ++x){
+    let str = '';
+    tileHolder = Object.assign({}, availableTiles);
+    for (let y = 0; y < words[x].length; ++y){
+      let wordHolder = words[x][y];
+      if (tileHolder.hasOwnProperty(wordHolder) && tileHolder[wordHolder] != 0){
+          str = str + wordHolder;
+          tileHolder[wordHolder] = tileHolder[wordHolder] - 1;
+
+      }
+      else if (tileHolder.hasOwnProperty('*') && tileHolder['*'] != 0){
+          str = str + '*';
+          tileHolder['*'] = tileHolder['*'] - 1;
+      }
+    }
+    wordArr.push([str, words[x]]);
+  }
+  return wordArr;
+
+}
+
 function bestPossibleWords(availableTiles) {
   // TODO
+  const tileHolder = Object.assign({}, availableTiles);
+  const bestWords = [];
+  let words = makeWord(tileHolder);
+  let highestScore = 0;
+  for (let x = 0; x < words.length; ++x){
+    if (baseScore(words[x][0]) > highestScore){
+      highestScore = baseScore(words[x][0]);
+    }
+  }
+  for (let x = 0; x < words.length; ++x){
+    if (baseScore(words[x][0]) === highestScore){
+      bestWords.push(words[x][1]);
+    }
+  }
+  return bestWords;
 }
+
+//console.log(bestPossibleWords({'*': 2}));
+console.log(possibleWords({c: 1, a: 1, t: 1}));
+console.log(bestPossibleWords({c: 1, a: 1, t: 1}));
+
+
 
 // This exports our public functions.
 export { canConstructWord, baseScore, possibleWords, bestPossibleWords };
